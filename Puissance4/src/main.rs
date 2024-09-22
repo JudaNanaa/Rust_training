@@ -1,11 +1,13 @@
 use std::io;
+
+use colored::Colorize;
 struct Game {
     tab : [[char; 7]; 6],
     width : i8,
     height : i8,
 }
 
-fn get_input(prompt: &str) -> u8 {
+fn get_input(prompt: String) -> u8 {
     loop {
         let mut input = String::new();
         println!("{}", prompt);
@@ -41,7 +43,10 @@ impl Game {
         println!("");
         for line in self.tab {
             for elem in line {
-                print!("| {} ", elem);
+                match elem {
+                    'r' | 'R' => print!("| {} ", elem.to_string().red()), 
+                    _ => print!("| {} ", elem.to_string().blue()),
+                }
             }
             println!("|");
             for _ in line {
@@ -114,19 +119,69 @@ impl Game {
         }
         return self.check_diagonaly_down(x + 1, y + 1, c, depth + 1)
     }
-    fn check_victory(&self, c : char) -> bool {
+
+    fn change_char_horizontaly(&mut self, x : i8, y : i8, c : char, depth : i32) {
+        if self.tab[y as usize][x as usize] == 'r' {
+            self.tab[y as usize][x as usize] = 'R';
+        } else {
+            self.tab[y as usize][x as usize] = 'B';
+        }
+        if depth == 4 {
+            return;
+        }
+        self.change_char_horizontaly(x + 1, y, c, depth + 1);
+    }
+    fn change_char_verticaly(&mut self, x : i8, y : i8, c : char, depth : i32) {
+        if self.tab[y as usize][x as usize] == 'r' {
+            self.tab[y as usize][x as usize] = 'R';
+        } else {
+            self.tab[y as usize][x as usize] = 'B';
+        }
+        if depth == 4 {
+            return;
+        }
+        self.change_char_verticaly(x, y + 1, c, depth + 1);
+    }
+    fn change_char_diagonaly_up(&mut self, x : i8, y : i8, c : char, depth : i32) {
+        if self.tab[y as usize][x as usize] == 'r' {
+            self.tab[y as usize][x as usize] = 'R';
+        } else {
+            self.tab[y as usize][x as usize] = 'B';
+        }
+        if depth == 4 {
+            return;
+        }
+        self.change_char_diagonaly_up(x + 1, y - 1, c, depth + 1);
+    }
+    fn change_char_diagonaly_down(&mut self, x : i8, y : i8, c : char, depth : i32) {
+        if self.tab[y as usize][x as usize] == 'r' {
+            self.tab[y as usize][x as usize] = 'R';
+        } else {
+            self.tab[y as usize][x as usize] = 'B';
+        }
+        if depth == 4 {
+            return;
+        }
+        self.change_char_horizontaly(x + 1, y + 1, c, depth + 1);
+    }
+
+    fn check_victory(&mut self, c : char) -> bool {
         for y in 0..6 {
             for x in 0..7 {
                 if self.check_horizontaly(x, y, c, 1) == 1 {
+                    self.change_char_horizontaly(x, y, c, 1);
                     return true;
                 }
                 if self.check_verticaly(x, y, c, 1) == 1 {
+                    self.change_char_verticaly(x, y, c, 1);
                     return true;
                 }
                 if self.check_diagonaly_up(x, y, c, 1) == 1 {
+                    self.change_char_diagonaly_up(x, y, c, 1);
                     return true;
                 }
                 if self.check_diagonaly_down(x, y, c, 1) == 1 {
+                    self.change_char_diagonaly_down(x, y, c, 1);
                     return true;
                 }
             }
@@ -140,23 +195,24 @@ fn main() {
     loop {
         tab.print();
         loop {
-            if tab.add_token_tab(get_input("Player Red to play"), 'R') == 1 {
+            if tab.add_token_tab(get_input(format!("Player {} to play !", "Red".red())), 'r') == 1 {
                 break;
             }
             tab.print();
         }
         tab.print();
-        if tab.check_victory('R') == true {
+        if tab.check_victory('r') == true {
+            tab.print();
             println!("Player Red win !!");
             break;
         }
         loop {
-            if tab.add_token_tab(get_input("Player Blue to play"), 'B') == 1 {
+            if tab.add_token_tab(get_input(format!("Player {} to play !", "Blue".blue())), 'b') == 1 {
                 break;
             }
         }
-        tab.print();
-        if tab.check_victory('B') == true{
+        if tab.check_victory('b') == true{
+            tab.print();
             println!("Player Blue win !!");
             break;
         }
