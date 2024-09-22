@@ -1,5 +1,5 @@
 use std::io;
-pub struct Game {
+struct Game {
     tab : [[char; 7]; 6],
     width : i8,
     height : i8,
@@ -34,6 +34,7 @@ impl Game {
         }
     }
     fn print(&self) {
+        std::process::Command::new("clear").status().unwrap();
         for index in 1..=7 {
             print!("  {} ", index);
         }
